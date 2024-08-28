@@ -1,12 +1,12 @@
 import numpy as np
 
 class Pagina:
-    def __init__(self, indice: int, tamanho_referencia: int, peso):
+    def __init__(self, indice: int, tamanho_referencias: int):
         self.indice = indice
-        self.lista_referencia = np.zeros(tamanho_referencia)
+        self.lista_referencias = np.zeros(tamanho_referencias) # é o quadro de bits que guarda as referências à página
         self.prox = None
         self.ant = None
-        self.tamanho_referencia = tamanho_referencia
+        self.tamanho_referencia = tamanho_referencias
         self.peso = 0
         
     def referencia(self):
