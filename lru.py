@@ -14,24 +14,62 @@ class Lru: ##classe que representa a memoria fisica
         # se não estiver, e tiver espaço, puxo ela da mem virtual
         # se não tiver espaço, gero falta de página
 
-        lista_ref = np.zeros(len(self.paginas))…
-[17:41, 30/08/2024] Mattos: from pagina import Pagina
-import random
+        lista_ref = np.zeros(len(self.paginas))
+        lista_fora_memoria = []
 
-class Mem_virtual:
-    def _init_(self,tam_memoria_virtual, tam_referencia):
-        self.tam_memoria_virtual = tam_memoria_virtual
-        self.tabela_paginas = [Pagina(i, tam_referencia) for i in range(tam_memoria_virtual)] # lista de páginas na memória virtual
+        for idx_pag_virtual in paginas_ref:
 
-    def get_pagina(self, idx_pagina):
-        return self.tabela_paginas[idx_pagina]        
+            for idx_pagina_fisica, pagina_fisica in enumerate(self.paginas):
 
-    
-    def referencias_virtual_para_fisica(self, pag_acessadas):
-        paginas_para_fisica = [] # lista de objetos 
+                if idx_pag_virtual == pagina_fisica.id:
+                    lista_ref[idx_pagina_fisica] = 1
 
-        for idx, pag in enumerate(self.tabela_paginas):
-            if pag_acessadas[idx] == 1:
-                paginas_para_fisica.append(pag.indice)
-            
-        return paginas_para_fisica
+                else:
+                    if(len(self.paginas) < self.tamanho):
+                        # self.paginas.append(Pagina(idx_pag, 8))
+                        # iria buscar a página na memória virtual(main.py)
+                        self.paginas.append(memoria_virtual.get_pagina(idx_pag_virtual))
+                        # verificar se as modificações realizadas no objeto Pagina, agora na Lru, serão refletidas para a main.py
+                        # se alterar, ao remover a pag nda memoria fisica, tem que zerar a lista de referencias
+                    else:
+                        # ele referencia todo mundo do bloco antes de acionar as faltas de página?
+                        lista_fora_memoria.append(memoria_virtual.get_pagina(idx_pag_virtual))
+                        # self.adiciona_falta_de_pagina(Pagina(pag))
+
+
+        # tem que realizar as referencias antes de realizar a falta de página
+        self.acessar_pagina(lista_ref)
+        
+        #fora do for chamando a falta de pagina 
+        for pagina_virtual_fora in lista_fora_memoria:
+            self.adiciona_falta_de_pagina(Pagina(pagina_virtual_fora))
+
+    def acessar_pagina(self, pag_acessadas): #recebe uma lista que indica se as páginas na memória fisica foram referenciadas ou não
+        #     [1, 0, 0, 1, 1]
+        # idx [7, 3, 5, 2, 4]
+        for idx, pag in enumerate(self.paginas):
+            if(pag_acessadas[idx] == 1):
+                pag.referencia()
+            else:
+                pag.nao_referencia()
+        self.ordena_lru()
+
+                
+    def ordena_lru(self):
+        print("Ordenando paginas")
+        ##percorrer as paginas e ordená a lista lru de acordo com os pesos das paginas
+
+        self.lru = sorted(self.lru, key=lambda x: self.paginas[x].peso)
+
+
+    def adiciona_falta_de_pagina(self, pagina):
+        id_remove = self.lru[-1]
+
+        for idx_pagina, pag in enumerate(self.paginas):
+            if id_remove == pag.id:
+                pagina_removida = self.paginas[idx_pagina]
+                # tem que zerar a pagina de referencia
+                pagina.referencia()
+                self.paginas[idx_pagina] = pagina
+                self.ordena_lru()
+                break
