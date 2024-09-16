@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação de LRU</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .memory-box {
+            display: inline-block;
+            padding: 10px;
+            border: 2px solid #000;
+            margin: 5px;
+        }
+        .memory-state {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação do Algoritmo LRU</h1>
+    
+    <div>
+        <label for="clk">Clock:</label>
+        <input type="number" id="clk" value="0" min="0" max="1">
+        <button onclick="simularLRU()">Simular</button>
+    </div>
+
+    <h2>Estado da Memória Física</h2>
+    
+    <h3>Antes da Operação</h3>
+    <div id="memoria-inicial" class="memory-state"></div>
+    
+    <h3>Depois da Operação</h3>
+    <div id="memoria-final" class="memory-state"></div>
+
+    <script>
+        function simularLRU() {
+            const clk = document.getElementById('clk').value;
+
+            // Envia a solicitação para o servidor
+            fetch('/simular', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `clk=${clk}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Atualiza a visualização do estado da memória
+                document.getElementById('memoria-inicial').innerHTML = '';
+                document.getElementById('memoria-final').innerHTML = '';
+                
+                data.memoria_inicial.forEach(pageId => {
+                    document.getElementById('memoria-inicial').innerHTML += `<div class="memory-box">Página ${pageId}</div>`;
+                });
+                
+                data.memoria_final.forEach(pageId => {
+                    document.getElementById('memoria-final').innerHTML += `<div class="memory-box">Página ${pageId}</div>`;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
