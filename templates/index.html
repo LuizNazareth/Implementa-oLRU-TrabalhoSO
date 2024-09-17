@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <!--aqui realizo a referencia aos css--> 
     <title>Simulação de LRU</title>
     <style>
+
         body {
             font-family: Arial, sans-serif;
             text-align: center;
         }
+
         .memory-box {
             display: inline-block;
             padding: 10px;
             border: 2px solid #000;
             margin: 5px;
         }
+
         .memory-state {
             display: flex;
             justify-content: center;
@@ -25,43 +30,50 @@
     <h1>Simulação do Algoritmo LRU</h1>
     
     <div>
-        <label for="clk">Clock:</label>
-        <input type="number" id="clk" value="0" min="0" max="1">
+        <label for="tam_memoria_virtual">Tamanho da Memória Virtual:</label>
+        <input type="number" id="tam_memoria_virtual" value="10" min="1">
+
+        <label for="tam_memoria_fisica">Tamanho da Memória Física:</label>
+        <input type="number" id="tam_memoria_fisica" value="5" min="1">
+        
+        <label for="num_clocks_simulados">Número de Clocks:</label>
+        <input type="number" id="num_clocks_simulados" value="4" min="1">
+
         <button onclick="simularLRU()">Simular</button>
     </div>
 
-    <h2>Estado da Memória Física</h2>
-    
-    <h3>Antes da Operação</h3>
-    <div id="memoria-inicial" class="memory-state"></div>
-    
-    <h3>Depois da Operação</h3>
-    <div id="memoria-final" class="memory-state"></div>
+    <h2>Simulação do Algoritmo</h2>
+
+    <div id="resultados-simulacao"></div>
 
     <script>
         function simularLRU() {
-            const clk = document.getElementById('clk').value;
+            const tam_memoria_virtual = document.getElementById('tam_memoria_virtual').value;
+            const tam_memoria_fisica = document.getElementById('tam_memoria_fisica').value;
+            const num_clocks_simulados = document.getElementById('num_clocks_simulados').value;
 
-            // Envia a solicitação para o servidor
+            //Envia a solicitação para o servidor com os parâmetros recebidos do usuário
+            //parte mais importante do html
             fetch('/simular', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `clk=${clk}`
+                body: `tam_memoria_virtual=${tam_memoria_virtual}&tam_memoria_fisica=${tam_memoria_fisica}&num_clocks_simulados=${num_clocks_simulados}`
             })
             .then(response => response.json())
             .then(data => {
-                // Atualiza a visualização do estado da memória
-                document.getElementById('memoria-inicial').innerHTML = '';
-                document.getElementById('memoria-final').innerHTML = '';
-                
-                data.memoria_inicial.forEach(pageId => {
-                    document.getElementById('memoria-inicial').innerHTML += `<div class="memory-box">Página ${pageId}</div>`;
-                });
-                
-                data.memoria_final.forEach(pageId => {
-                    document.getElementById('memoria-final').innerHTML += `<div class="memory-box">Página ${pageId}</div>`;
+                const resultadosDiv = document.getElementById('resultados-simulacao');
+                resultadosDiv.innerHTML = '';
+
+                data.forEach(clockData => {
+                    resultadosDiv.innerHTML += `
+                        <h3>Clock ${clockData.clk}</h3>
+                        <h4>Páginas Acessadas: [${clockData.paginas_acessadas.join(', ')}]</h4>
+                        <h4>Memória Física Antes da Operação: [${clockData.memoria_inicial.join(', ')}]</h4>
+                        <h4>Memória Física Depois da Operação: [${clockData.memoria_final.join(', ')}]</h4>
+                        <hr>
+                    `;
                 });
             });
         }

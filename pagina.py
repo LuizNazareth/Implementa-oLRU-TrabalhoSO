@@ -3,8 +3,8 @@ import numpy as np
 class Pagina:
     def __init__(self, id: int, tamanho_referencias: int):
         self.id = id 
-        self.lista_referencias = np.zeros(tamanho_referencias, dtype=int) # Define dtype como int
-        self.tamanho_referencia = tamanho_referencias
+        self.lista_referencias = np.zeros(tamanho_referencias, dtype=int) # lista que representa o numero binário e permite usar o algoritmo de aging
+        self.tamanho_referencia = tamanho_referencias 
         self.peso = 0
         self.estado = 0
         

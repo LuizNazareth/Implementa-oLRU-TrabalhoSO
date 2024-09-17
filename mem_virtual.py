@@ -1,5 +1,4 @@
 from pagina import Pagina
-import random
 
 class Mem_virtual:
     def __init__(self,tam_memoria_virtual, tam_referencia):
@@ -10,7 +9,6 @@ class Mem_virtual:
         for idx, pag_fis in enumerate(self.tabela_paginas):
             if pag_fis.id == id_pagina:
                 return self.tabela_paginas[idx]      
-
     
     def referencias_virtual_para_fisica(self, pag_acessadas):
         paginas_para_fisica = [] # lista de objetos

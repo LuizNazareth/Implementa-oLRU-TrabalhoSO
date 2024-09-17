@@ -23,19 +23,7 @@ class Lru:
                 # Página já está na memória, somente atualiza a referência
                 lista_ref[self.paginas.index(pagina_fisica)] = 1 
             else:
-                # if len(self.paginas) < self.tamanho:
-                #     # Adiciona nova página se há espaço na memória física
-                #     nova_pagina = memoria_virtual.get_pagina(id_pag_virtual)
-                #     self.paginas.append(nova_pagina)
-                #     lista_ref[len(self.paginas) - 1] = 1
-                #     # Atualiza a lista LRU
-                #     self.lru.append(nova_pagina)
-
-                #     # VERIFICAR SE É AQUI QUE ADICIONAMOS AS PAGINAS OU SE É PELA FUNÇÃO ADICIONA_FALTA_DE_PAGINA
-                # else:
-                #     # Se não há espaço, precisa substituir uma página existente
-                #     lista_fora_memoria.append(memoria_virtual.get_pagina(id_pag_virtual))
-
+                # Página não está na memória, adiciona à lista de páginas fora da memória, que entraram na memória física pela falta de página
                 lista_fora_memoria.append(memoria_virtual.get_pagina(id_pag_virtual))
 
         print(f"Lista de referências: {lista_ref}") # lista de 0 ou 1, indicando se a página naquela posição foi referenciada ou não
@@ -43,13 +31,10 @@ class Lru:
         print()
 
         self.acessar_pagina(lista_ref)
-        for pagina_virtual_fora in lista_fora_memoria:
-            self.adiciona_falta_de_pagina(pagina_virtual_fora)
+        self.adiciona_falta_de_pagina(lista_fora_memoria)
 
         print(f"Estado final da memória física: {[pag.id for pag in self.paginas]}")
         print()
-
-        
 
     def acessar_pagina(self, pag_acessadas):
         for idx, pag in enumerate(self.paginas):
@@ -57,37 +42,41 @@ class Lru:
                 pag.referencia()
             else:
                 pag.nao_referencia()
-        self.ordena_lru()
-        print(f"Lista LRU ordenada (apos acessos): {[(pag.id, pag.peso) for pag in self.lru]}")
+        # self.ordena_lru()
+        # print(f"Lista LRU ordenada (apos acessos): {[(pag.id, pag.peso) for pag in self.lru]}")
 
     def ordena_lru(self):
         print("Ordenando a lista LRU")
         # Reordenar a lista LRU baseado nos pesos das páginas
-        self.lru.sort(key=lambda pag: pag.peso, reverse=True)
+        # A lista lru deve conter os indices do vetor de páginas, ordenado de acordo com o peso de cada pagina contina nesse indice
+        self.lru.sort(key=lambda idx_pag: self.paginas[idx_pag].peso, reverse=True)
+        # self.lru.sort(key=lambda pag: pag.peso, reverse=True)
 
-    def adiciona_falta_de_pagina(self, pagina_entra):
-        # if len(self.paginas) == 0:
-        #     # Se não há páginas na memória, adiciona a nova página
-        #     self.paginas.append(pagina_entra)
-        #     self.lru.append(pagina_entra)
+    def adiciona_falta_de_pagina(self, lista_fora_memoria):
+        for pagina_entra in lista_fora_memoria:
+            if len(self.paginas) < self.tamanho:
+                # Se ainda há espaço na memória física, adiciona a nova página
+                pagina_entra.estado = 1
+                self.paginas.append(pagina_entra)
+                self.lru.append(0 if(len(self.lru) == 0) else len(self.lru))
+                self.paginas[-1].referencia()  
+                self.paginas[self.lru[-1]]        
+            else:
+                self.ordena_lru()
+                print(f"Lista LRU ordenada (antes falta de pagina): {[(self.paginas[idx_pag].id, self.paginas[idx_pag].peso) for idx_pag in self.lru]}")
 
-        #     # PODERIA MUDAR ESSA LÓGICA PARA ADICIONAR CASO TENHA ESPAÇO NA MEMÓRIA FÍSICA
+                # Remove a última página da lista LRU (a menos utilizada)
+                # pagina_removida = self.lru.pop()
+                pagina_removida = self.paginas[self.lru[-1]]
+                pagina_removida.estado = 0
+                index_removida = self.paginas.index(pagina_removida)
+                self.paginas.remove(pagina_removida)
 
-        if len(self.paginas) < self.tamanho:
-            # Se ainda há espaço na memória física, adiciona a nova página
-            self.paginas.append(pagina_entra)
-            self.lru.append(pagina_entra)
-            self.paginas[-1].referencia()
-            self.ordena_lru()
-        else:
-            # Remove a última página da lista LRU (a menos utilizada)
-            pagina_removida = self.lru.pop()
-            self.paginas.remove(pagina_removida)
+                # Adiciona a nova página na mesma posição da página removida
+                self.paginas.insert(index_removida, pagina_entra)
+                # self.lru.append(pagina_entra)
+                # self.lru.append(index_removida)
+                self.paginas[index_removida].referencia()
+                # self.ordena_lru()
 
-            # Adiciona a nova página
-            self.paginas.append(pagina_entra)
-            self.lru.append(pagina_entra)
-            self.paginas[-1].referencia()
-            self.ordena_lru()
-
-        print(f"Lista LRU ordenada (apos falta de pagina): {[(pag.id, pag.peso) for pag in self.lru]}")
+        print(f"Lista LRU ordenada (apos falta de pagina): {[(self.paginas[idx_pag].id, self.paginas[idx_pag].peso) for idx_pag in self.lru]}")
