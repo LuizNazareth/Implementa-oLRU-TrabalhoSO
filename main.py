@@ -28,8 +28,8 @@ for clk in range(num_clocks_simulados):
     print("Páginas acessadas")
     print(pag_acessadas)
 
-    ids_paginas_ref = mem_virtual.referencias_virtual_para_fisica(pag_acessadas) # lista de ids das páginas que foram referenciadas
-    mem_fisica.referencia_paginas(ids_paginas_ref, mem_virtual)
+    ids_paginas_ref_dentro, ids_paginas_ref_fora = mem_virtual.referencias_virtual_para_fisica(pag_acessadas) # lista de ids das páginas que foram referenciadas
+    mem_fisica.referencia_paginas(ids_paginas_ref_dentro, ids_paginas_ref_fora, mem_virtual)
 
 # pag_acessadas = [[0, 0, 1, 0, 1, 0, 1, 0, 1, 0],
 #                  [1, 0, 0, 0, 1, 0, 1, 0, 1, 0],

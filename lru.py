@@ -7,24 +7,22 @@ class Lru:
         self.paginas = []  # Páginas na memória física. É uma lista de objetos pagina
         self.lru = []  # Armazena diretamente as referências às páginas. É uma lista de objetos pagina
 
-    def referencia_paginas(self, ids_paginas_ref, memoria_virtual):
+    def referencia_paginas(self, ids_paginas_ref_dentro, ids_paginas_ref_fora, memoria_virtual):
         lista_ref = np.zeros(self.tamanho)
         lista_fora_memoria = []
 
-        print(f"\nReferenciando páginas: {ids_paginas_ref}")
+        # print(f"\nReferenciando páginas: {ids_paginas_ref}")
         print(f"Estado atual da memória física: {[pag.id for pag in self.paginas]}")
         print()
 
-        for id_pag_virtual in ids_paginas_ref:
+        for id_pag_virtual_dentro in ids_paginas_ref_dentro:
             # Verifica se a página já está na memória física
-            pagina_fisica = next((pag for pag in self.paginas if pag.id == id_pag_virtual), None)
+            pagina_fisica = next((pag for pag in self.paginas if pag.id == id_pag_virtual_dentro), None)
+            lista_ref[self.paginas.index(pagina_fisica)] = 1
+            
+        for id_pag_virtual_fora in ids_paginas_ref_fora:
+            lista_fora_memoria.append(memoria_virtual.get_pagina(id_pag_virtual_fora))
 
-            if pagina_fisica:##modificação luiz, esse if estava errado
-                # Página já está na memória, somente atualiza a referência
-                lista_ref[self.paginas.index(pagina_fisica)] = 1 
-            else:
-                # Página não está na memória, adiciona à lista de páginas fora da memória, que entraram na memória física pela falta de página
-                lista_fora_memoria.append(memoria_virtual.get_pagina(id_pag_virtual))
 
         print(f"Lista de referências: {lista_ref}") # lista de 0 ou 1, indicando se a página naquela posição foi referenciada ou não
         print(f"Lista de páginas fora da memória: {[pag.id for pag in lista_fora_memoria]}")

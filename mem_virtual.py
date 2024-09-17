@@ -11,11 +11,15 @@ class Mem_virtual:
                 return self.tabela_paginas[idx]      
     
     def referencias_virtual_para_fisica(self, pag_acessadas):
-        paginas_para_fisica = [] # lista de objetos
+        paginas_para_fisica_dentro = [] # lista de objetos
+        paginas_para_fisica_fora = []
 
         for idx, pag in enumerate(self.tabela_paginas):
             # print(idx)
             if pag_acessadas[idx] == 1:
-                paginas_para_fisica.append(pag.id)
+                if pag.estado == 0:
+                    paginas_para_fisica_fora.append(pag.id)
+                else:
+                    paginas_para_fisica_dentro.append(pag.id)
             
-        return paginas_para_fisica
+        return paginas_para_fisica_dentro, paginas_para_fisica_fora

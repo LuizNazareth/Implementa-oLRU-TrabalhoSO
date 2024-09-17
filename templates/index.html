@@ -3,28 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <!--aqui realizo a referencia aos css--> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Simulação de LRU</title>
-    <style>
-
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        .memory-box {
-            display: inline-block;
-            padding: 10px;
-            border: 2px solid #000;
-            margin: 5px;
-        }
-
-        .memory-state {
-            display: flex;
-            justify-content: center;
-        }
-    </style>
 </head>
 <body>
     <h1>Simulação do Algoritmo LRU</h1>
@@ -52,30 +32,36 @@
             const tam_memoria_fisica = document.getElementById('tam_memoria_fisica').value;
             const num_clocks_simulados = document.getElementById('num_clocks_simulados').value;
 
-            //Envia a solicitação para o servidor com os parâmetros recebidos do usuário
-            //parte mais importante do html
             fetch('/simular', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `tam_memoria_virtual=${tam_memoria_virtual}&tam_memoria_fisica=${tam_memoria_fisica}&num_clocks_simulados=${num_clocks_simulados}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                const resultadosDiv = document.getElementById('resultados-simulacao');
-                resultadosDiv.innerHTML = '';
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `tam_memoria_virtual=${encodeURIComponent(tam_memoria_virtual)}&tam_memoria_fisica=${encodeURIComponent(tam_memoria_fisica)}&num_clocks_simulados=${encodeURIComponent(num_clocks_simulados)}`
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+})
+.then(data => {
+    const resultadosDiv = document.getElementById('resultados-simulacao');
+    resultadosDiv.innerHTML = '';
 
-                data.forEach(clockData => {
-                    resultadosDiv.innerHTML += `
-                        <h3>Clock ${clockData.clk}</h3>
-                        <h4>Páginas Acessadas: [${clockData.paginas_acessadas.join(', ')}]</h4>
-                        <h4>Memória Física Antes da Operação: [${clockData.memoria_inicial.join(', ')}]</h4>
-                        <h4>Memória Física Depois da Operação: [${clockData.memoria_final.join(', ')}]</h4>
-                        <hr>
-                    `;
-                });
-            });
+    data.forEach(clockData => {
+        resultadosDiv.innerHTML += 
+            `<h3>Clock ${clockData.clk}</h3>
+             <h4>Páginas Acessadas: [${clockData.paginas_acessadas.map(p => p !== 0 ? p : '').filter(p => p !== '').join(', ')}]</h4>
+             <h4>Memória Física Antes da Operação: [${clockData.memoria_inicial.join(', ')}]</h4>
+             <h4>Memória Física Depois da Operação: [${clockData.memoria_final.join(', ')}]</h4>
+             <hr>`
+        ;
+    });
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+});
         }
     </script>
 </body>
